@@ -8,10 +8,12 @@ import org.springframework.context.ConfigurableApplicationContext;
 @SpringBootApplication
 public class SpringRestConsumerApplication {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		ConfigurableApplicationContext ctx = SpringApplication.run(SpringRestConsumerApplication.class, args);
 		ApplicationConfig config = ctx.getBean(ApplicationConfig.class);
 		config.dataAggregator().getData();
+		config.postDao().insertData();
+		
 	}
 
 

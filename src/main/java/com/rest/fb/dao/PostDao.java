@@ -1,24 +1,26 @@
 package com.rest.fb.dao;
 
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
-import com.rest.fb.service.DataAggregator;
-
 public class PostDao {
-	
-	MongoTemplate mongoOperations;
-    
-    DataAggregator dataAggregator;
 
-    public PostDao(DataAggregator dataAggregator, MongoTemplate mongoTemplate) {
-    	this.dataAggregator = dataAggregator;
-    	this.mongoOperations=mongoTemplate;
+	private final static Logger logger = LoggerFactory.getLogger(PostDao.class);
+
+	MongoTemplate mongoTemplate;
+
+	public PostDao(MongoTemplate mongoTemplate) {
+		this.mongoTemplate = mongoTemplate;
 	}
 
-	public void insertData(){
-    	
-    	mongoOperations.insertAll(dataAggregator.getData());
-    	
-    }
+	public <T> void insertData(List<T> list) {
+		logger.info("Persisting list");
+		mongoTemplate.insertAll(list);
+		logger.info("persist process finished");
+
+	}
 
 }

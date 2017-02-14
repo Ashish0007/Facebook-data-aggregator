@@ -1,14 +1,16 @@
 package com.rest.fb.service;
 
-import com.rest.fb.domain.Post;
-import com.rest.fb.util.HttpUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
+
+import com.rest.fb.dao.PostDao;
+import com.rest.fb.domain.Post;
+import com.rest.fb.util.HttpUtil;
 
 public class DataAggregator {
 
@@ -24,6 +26,9 @@ public class DataAggregator {
 
 	@Autowired
 	HttpUtil httpUtil;
+	
+	@Autowired
+	PostDao postDao;
 
 	private String getUrl() {
 
@@ -48,18 +53,39 @@ public class DataAggregator {
 		return post;
 	}
 
-	public List<Post> getData() {
+	public void getData() {
 
-		System.out.println(getUrl());
 		HashMap<String, Object> body = httpUtil.execute(getUrl(), HttpMethod.GET, null, null).getBody();
 
 		List<Object> data = (List<Object>) body.get("data");
-
+		Map<String,String> paging = (Map<String, String>) body.get("paging");
+		
 		List<Post> posts = data.stream().map(feed -> getPosts(feed)).filter(feed -> feed.containsKey("message"))
 				.map(feed -> {
 					return getMessageAndLike(feed);
 				}).collect(Collectors.toList());
-		return posts;
+		
+		postDao.insertData(posts);
+		
+		while(paging.get("next") != null || paging.get("next").isEmpty()){
+
+			body.clear();
+			data.clear();
+			paging.clear();
+			posts.clear();
+			
+			body = httpUtil.execute(getUrl(), HttpMethod.GET, null, null).getBody();
+			data = (List<Object>) body.get("data");
+			paging = (Map<String, String>) body.get("paging");
+			
+			 posts = data.stream().map(feed -> getPosts(feed)).filter(feed -> feed.containsKey("message"))
+					.map(feed -> {
+						return getMessageAndLike(feed);
+					}).collect(Collectors.toList());
+			
+			postDao.insertData(posts);
+			
+		}
 	}
 
 }

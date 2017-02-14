@@ -12,7 +12,6 @@ public class SpringRestConsumerApplication {
 		ConfigurableApplicationContext ctx = SpringApplication.run(SpringRestConsumerApplication.class, args);
 		ApplicationConfig config = ctx.getBean(ApplicationConfig.class);
 		config.dataAggregator().getData();
-		config.postDao().insertData();
 		
 	}
 
